@@ -1,0 +1,11 @@
+[package]
+name = "wasd_roku"
+version = "0.1.0"
+authors = ["James Jackson <j.e.m.jackson@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+cursive = "0.10"
+hyper = "0.12"
+regex = "0.1"
+reqwest = "0.7"
