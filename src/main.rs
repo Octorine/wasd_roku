@@ -65,12 +65,16 @@ fn main() {
     attach_keys(&mut siv, 's', &loc, "Down");
     attach_keys(&mut siv, 'd', &loc, "Right");
     attach_keys(&mut siv, cev::Key::Left, &loc, "Left");
-    attach_keys(&mut siv, cev::Key::Right, &loc, "Left");
-    attach_keys(&mut siv, cev::Key::Up, &loc, "Left");
-    attach_keys(&mut siv, cev::Key::Down, &loc, "Left");
+    attach_keys(&mut siv, cev::Key::Right, &loc, "Right");
+    attach_keys(&mut siv, cev::Key::Up, &loc, "Up");
+    attach_keys(&mut siv, cev::Key::Down, &loc, "Down");
 
     attach_keys(&mut siv, ' ', &loc, "Select");
+    attach_keys(&mut siv, cev::Key::Enter, &loc, "Select");
+    
     attach_keys(&mut siv, 'h', &loc, "Home");
+    attach_keys(&mut siv, cev::Key::Home, &loc, "Home");
+    
     attach_keys(&mut siv, cev::Key::Backspace, &loc, "Back");
     siv.run();
 }
