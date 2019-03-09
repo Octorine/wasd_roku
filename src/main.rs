@@ -1,8 +1,9 @@
+use cursive::event as cev;
 use cursive::view::Identifiable;
-use std::net::UdpSocket;
-use std::str;
-use std::rc::Rc;
 use regex::Regex;
+use std::net::UdpSocket;
+use std::rc::Rc;
+use std::str;
 
 fn discover() -> Option<String> {
     const MULTICAST_ADDRESS: &'static str = "239.255.255.250:1900";
@@ -33,16 +34,23 @@ ST: roku:ecp
 fn send_key(c: &mut cursive::Cursive, location: &String, msg: String, view: String) {
     let url = format!("{}keypress/{}", location, msg);
     let client = reqwest::Client::new().unwrap();
-    client
-        .post(&url)
-        .unwrap()
-        .send()
-        .unwrap();
+    client.post(&url).unwrap().send().unwrap();
     c.call_on_id(&view, |view: &mut cursive::views::TextView| {
         view.set_content(msg.clone())
     });
 }
 
+fn attach_keys<E: Into<cev::Event>>(
+    s: &mut cursive::Cursive,
+    k: E,
+    loc: &Rc<String>,
+    cmd: &'static str,
+) {
+    let loc = loc.clone();
+    s.add_global_callback(k, move |s| {
+        send_key(s, &loc, cmd.to_string(), "label".to_string())
+    });
+}
 fn main() {
     let location = discover().expect("Couldn't find Roku");
     let mut siv = cursive::Cursive::ncurses();
@@ -52,32 +60,17 @@ fn main() {
     siv.add_global_callback('q', |s| s.quit());
     let location_ref = Rc::new(location);
     let loc = location_ref.clone();
-    siv.add_global_callback('w', move |s| {
-        send_key(s, &loc, "Up".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback('a', move |s| {
-        send_key(s, &loc, "Left".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback('s', move |s| {
-        send_key(s, &loc, "Down".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback('d', move |s| {
-        send_key(s, &loc, "Right".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback(' ', move |s| {
-        send_key(s, &loc, "Select".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback('h', move |s| {
-        send_key(s, &loc, "Home".to_string(), "label".to_string())
-    });
-    let loc = location_ref.clone();
-    siv.add_global_callback(cursive::event::Key::Backspace, move |s| {
-        send_key(s, &loc, "Back".to_string(), "label".to_string())
-    });
+    attach_keys(&mut siv, 'w', &loc, "Up");
+    attach_keys(&mut siv, 'a', &loc, "Left");
+    attach_keys(&mut siv, 's', &loc, "Down");
+    attach_keys(&mut siv, 'd', &loc, "Right");
+    attach_keys(&mut siv, cev::Key::Left, &loc, "Left");
+    attach_keys(&mut siv, cev::Key::Right, &loc, "Left");
+    attach_keys(&mut siv, cev::Key::Up, &loc, "Left");
+    attach_keys(&mut siv, cev::Key::Down, &loc, "Left");
+
+    attach_keys(&mut siv, ' ', &loc, "Select");
+    attach_keys(&mut siv, 'h', &loc, "Home");
+    attach_keys(&mut siv, cev::Key::Backspace, &loc, "Back");
     siv.run();
 }
